@@ -72,7 +72,3 @@ resource "proxmox_virtual_environment_vm" "k3s_node" {
 
   boot_order = ["scsi0"]
 }
-
-output "k3s_node_ips" {
-  value = [for vm in proxmox_virtual_environment_vm.k3s_node.vm : ipv4_addresses[0]]
-}
