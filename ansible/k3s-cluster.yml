@@ -1,0 +1,24 @@
+- hosts: k3s_server
+  become: yes
+  vars:
+    ansible_user: ubuntu
+  tasks:
+    - name: Install K3s server
+      shell: curl -sfL https://get.k3s.io | sh -
+
+    - name: Fetch K3s token
+      shell: cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token
+      changed_when: false
+
+- hosts: k3s_agents
+  become: yes
+  vars:
+    k3s_token: "{{ hostvars['k3s_server']['k3s_token']['stdout'] }}"
+    k3s_url: "https://{{ hostvars['k3s_server']['ansible_host'] }}:6443"
+    ansible_user: ubuntu
+  tasks:
+    - name: Install K3s agent
+      shell: |
+        curl -sfL https://get.k3s.io | \
+        K3S_URL="{{ k3s_url }}" K3S_TOKEN="{{ k3s_token }}" sh -
